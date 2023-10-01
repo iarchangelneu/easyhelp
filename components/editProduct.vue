@@ -65,7 +65,7 @@
         </div>
 
         <div class="text-center">
-            <button ref="createProduct" @click="submitForm">Опубликовать товар</button>
+            <button ref="save" @click="submitForm">Опубликовать товар</button>
         </div>
 
     </div>
@@ -80,7 +80,7 @@ export default {
     },
     data() {
         return {
-            pathUrl: 'https://EasyHelp.kz',
+            pathUrl: 'https://easyhelp.kz',
             selectedCategory: null,
             discount: 0,
             price: 0,
@@ -92,16 +92,14 @@ export default {
             courseFeaturesText: '',
             product: [],
             categories: [
-                { id: 1, name: "Стикеры" },
-                { id: 2, name: "Одежда" },
-                { id: 3, name: "Чехлы на телефон" },
-                { id: 4, name: "Постеры" },
-                { id: 5, name: "Для дома" },
-                { id: 6, name: "Аксессуары" },
-                { id: 7, name: "Для питомцев" },
-                { id: 8, name: "Канцелярия" },
-                { id: 9, name: "Для детей" },
-                { id: 10, name: "Подарочные наборы" },
+                { id: 1, name: 'Клининг' },
+                { id: 2, name: 'Ремонт дома' },
+                { id: 3, name: 'Сантехника' },
+                { id: 4, name: 'Строительство' },
+                { id: 5, name: 'Электрика' },
+                { id: 6, name: 'Сборка мебели' },
+                { id: 7, name: 'Установка' },
+                { id: 8, name: 'Погрузка' },
             ],
         }
     },

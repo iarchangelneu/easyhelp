@@ -1,26 +1,28 @@
 <template>
-    <div class="expert">
+    <div v-if="seller.lenght <= 0"></div>
+    <div class="expert" v-else>
         <prevPage></prevPage>
 
-        <h1>Клининг «Белоснежка»</h1>
+        <h1 v-if="seller.length <= 0"></h1>
+        <h1 v-else>{{ seller.user.first_name }}</h1>
 
         <div class="expert__info">
-            <img src="@/assets/img/expert.png" alt="">
+            <img :src="seller.photo" alt="">
 
             <div class="expert__desc">
-                <h2>Категория: <span>клининг</span></h2>
 
-                <h2>Описание услуги:</h2>
+                <h2>Категория: <span v-if="seller.length <= 0"></span> <span v-else> {{ seller.category.category_name
+                }}</span></h2>
 
-                <div v-html="description"></div>
+
+
+                <div v-html="seller.description"></div>
             </div>
 
             <div class="expert__tags">
-                <ul>
-                    <li>Разные виды площади</li>
-                    <li>Выгодный прайс</li>
-                    <li>Экологичные средства</li>
-                    <li>Сложные виды уборки</li>
+                <ul v-if="seller.features">
+                    <li v-for="( feature, index ) in  seller.features.split('\r\n') " :key="index">{{ feature }}
+                    </li>
                 </ul>
             </div>
         </div>
@@ -29,83 +31,18 @@
             <h1>Услуги исполнителя</h1>
 
             <div class="catalog">
-                <div class="catalog__item">
-                    <img src="@/assets/img/pop1.png" alt="">
-                    <h1>Генеральная уборка</h1>
+                <div class="catalog__item" v-for=" item  in  seller.products">
+                    <img :src="item.add_image[0].image" alt="">
+                    <h1>{{ item.name }}</h1>
 
-                    <ul>
-                        <li>Мытье окон</li>
-                        <li>Чистка сантехники</li>
-                        <li>Мытье полов с отпариванием</li>
-                        <li>1 раз в неделю</li>
+                    <ul v-if="item.key_features">
+                        <li v-for="( feature, index ) in  item.key_features.split('\r\n') " :key="index">{{ feature }}
+                        </li>
                     </ul>
 
                     <div class="price">
-                        <h2>80 000 ₸</h2>
-                        <NuxtLink to="/expert/1">Подробнее</NuxtLink>
-                    </div>
-                </div>
-                <div class="catalog__item">
-                    <img src="@/assets/img/pop5.png" alt="">
-                    <h1>Генеральная уборка</h1>
-
-                    <ul>
-                        <li>Мытье окон</li>
-                        <li>Чистка сантехники</li>
-                        <li>Мытье полов с отпариванием</li>
-                    </ul>
-
-                    <div class="price">
-                        <h2>80 000 ₸</h2>
-                        <NuxtLink to="/expert/1">Подробнее</NuxtLink>
-                    </div>
-                </div>
-                <div class="catalog__item">
-                    <img src="@/assets/img/pop2.png" alt="">
-                    <h1>Генеральная уборка</h1>
-
-                    <ul>
-                        <li>Мытье окон</li>
-                        <li>Чистка сантехники</li>
-                        <li>Мытье полов с отпариванием</li>
-                        <li>1 раз в неделю</li>
-                    </ul>
-
-                    <div class="price">
-                        <h2>80 000 ₸</h2>
-                        <NuxtLink to="/expert/1">Подробнее</NuxtLink>
-                    </div>
-                </div>
-                <div class="catalog__item">
-                    <img src="@/assets/img/pop3.png" alt="">
-                    <h1>Генеральная уборка</h1>
-
-                    <ul>
-                        <li>Мытье окон</li>
-                        <li>Чистка сантехники</li>
-                        <li>Мытье полов с отпариванием</li>
-                        <li>1 раз в неделю</li>
-                    </ul>
-
-                    <div class="price">
-                        <h2>80 000 ₸</h2>
-                        <NuxtLink to="/expert/1">Подробнее</NuxtLink>
-                    </div>
-                </div>
-                <div class="catalog__item">
-                    <img src="@/assets/img/pop4.png" alt="">
-                    <h1>Генеральная уборка</h1>
-
-                    <ul>
-                        <li>Мытье окон</li>
-                        <li>Чистка сантехники</li>
-                        <li>Мытье полов с отпариванием</li>
-                        <li>1 раз в неделю</li>
-                    </ul>
-
-                    <div class="price">
-                        <h2>80 000 ₸</h2>
-                        <NuxtLink to="/expert/1">Подробнее</NuxtLink>
+                        <h2>{{ item.price.toLocaleString() + ' ₸' }}</h2>
+                        <NuxtLink :to="'/product/' + item.id">Подробнее</NuxtLink>
                     </div>
                 </div>
             </div>
@@ -113,11 +50,33 @@
     </div>
 </template>
 <script>
+import global from '~/mixins/global';
+import axios from 'axios';
 export default {
+    mixins: [global],
     data() {
         return {
+            productId: this.$route.params.id,
+            seller: [],
+            pathUrl: 'https://easyhelp.kz',
             description: 'Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание',
         }
+    },
+    methods: {
+        getSeller() {
+            const path = `${this.pathUrl}/api/seller/this-seller/${this.productId}`
+            axios
+                .get(path)
+                .then(response => {
+                    this.seller = response.data
+                })
+                .catch(error => {
+                    console.error(error)
+                })
+        },
+    },
+    mounted() {
+        this.getSeller()
     }
 }
 </script>

@@ -15,121 +15,31 @@
         </div>
 
         <div class="sales" v-if="activeTab == 0">
-            <div class="sales__item">
+            <div class="sales__item" v-for="item in buys" :key="item.id">
                 <img src="@/assets/img/why.png" alt="">
 
                 <div class="item__info">
-                    <h1>Услуга Генеральная уборка</h1>
-                    <h1>80 000 ₸</h1>
+                    <h1>{{ item.products.name }}</h1>
+                    <h1>{{ item.products.price.toLocaleString() + ' ₸' }}</h1>
 
-                    <span class="date">Дата заказа: 12.08.2023</span>
+                    <span class="date">Дата заказа: {{ formatDate(item.date) }}</span>
                     <span>Исполнитель:<br>
-                        Клининг «Белоснежка» </span>
+                        {{ item.seller.user.first_name }} </span>
 
-                    <button>Чат с исполнителем</button>
-                </div>
-            </div>
-            <div class="sales__item">
-                <img src="@/assets/img/why.png" alt="">
-
-                <div class="item__info">
-                    <h1>Услуга Генеральная уборка</h1>
-                    <h1>80 000 ₸</h1>
-
-                    <span class="date">Дата заказа: 12.08.2023</span>
-                    <span>Исполнитель:<br>
-                        Клининг «Белоснежка» </span>
-
-                    <button>Чат с исполнителем</button>
-                </div>
-            </div>
-            <div class="sales__item">
-                <img src="@/assets/img/why.png" alt="">
-
-                <div class="item__info">
-                    <h1>Услуга Генеральная уборка</h1>
-                    <h1>80 000 ₸</h1>
-
-                    <span class="date">Дата заказа: 12.08.2023</span>
-                    <span>Исполнитель:<br>
-                        Клининг «Белоснежка» </span>
-
-                    <button>Чат с исполнителем</button>
-                </div>
-            </div>
-            <div class="sales__item">
-                <img src="@/assets/img/why.png" alt="">
-
-                <div class="item__info">
-                    <h1>Услуга Генеральная уборка</h1>
-                    <h1>80 000 ₸</h1>
-
-                    <span class="date">Дата заказа: 12.08.2023</span>
-                    <span>Исполнитель:<br>
-                        Клининг «Белоснежка» </span>
-
-                    <button>Чат с исполнителем</button>
-                </div>
-            </div>
-            <div class="sales__item">
-                <img src="@/assets/img/why.png" alt="">
-
-                <div class="item__info">
-                    <h1>Услуга Генеральная уборка</h1>
-                    <h1>80 000 ₸</h1>
-
-                    <span class="date">Дата заказа: 12.08.2023</span>
-                    <span>Исполнитель:<br>
-                        Клининг «Белоснежка» </span>
-
-                    <button>Чат с исполнителем</button>
-                </div>
-            </div>
-            <div class="sales__item">
-                <img src="@/assets/img/why.png" alt="">
-
-                <div class="item__info">
-                    <h1>Услуга Генеральная уборка</h1>
-                    <h1>80 000 ₸</h1>
-
-                    <span class="date">Дата заказа: 12.08.2023</span>
-                    <span>Исполнитель:<br>
-                        Клининг «Белоснежка» </span>
-
-                    <button>Чат с исполнителем</button>
+                    <button @click="createChat(item.seller.id, item.seller.user.first_name)">Чат с исполнителем</button>
                 </div>
             </div>
         </div>
 
         <div class="chats" v-if="activeTab == 2">
-            <div class="chat__item">
+            <div class="chat__item" v-for="chat in chats" :key="chat.id">
                 <div>
-                    <h2>alex.ivanov@gmail.com</h2>
+                    <h2>{{ chat.seller.user.first_name }}</h2>
                     <!-- <small>23.07.2023 14:47</small> -->
                 </div>
 
                 <div class="justify-content-end">
-                    <button @click="activeTab = 7">Открыть чат</button>
-                </div>
-            </div>
-            <div class="chat__item">
-                <div>
-                    <h2>alex.ivanov@gmail.com</h2>
-                    <!-- <small>23.07.2023 14:47</small> -->
-                </div>
-
-                <div class="justify-content-end">
-                    <button @click="activeTab = 7">Открыть чат</button>
-                </div>
-            </div>
-            <div class="chat__item">
-                <div>
-                    <h2>alex.ivanov@gmail.com</h2>
-                    <!-- <small>23.07.2023 14:47</small> -->
-                </div>
-
-                <div class="justify-content-end">
-                    <button @click="activeTab = 7">Открыть чат</button>
+                    <button @click="openChat(chat.id, chat.seller.user.first_name)">Открыть чат</button>
                 </div>
             </div>
         </div>
@@ -138,15 +48,15 @@
             <div class="inp">
                 <label for="email">Эл.почта</label>
                 <input type="email" v-model="email" placeholder="Эл.почта">
-                <div class="text-right">
+                <!-- <div class="text-right">
                     <button class="save">сохранить изменения</button>
-                </div>
+                </div> -->
             </div>
             <div class="inp">
                 <label for="password">Пароль</label>
-                <input type="password" placeholder="Пароль">
+                <input type="password" placeholder="Пароль" v-model="password">
                 <div class="text-left">
-                    <button>выйти</button>
+                    <button @click="logOut()">выйти</button>
                 </div>
             </div>
         </div>
@@ -156,14 +66,105 @@
     </div>
 </template>
 <script>
+import global from '~/mixins/global';
+import axios from 'axios';
 export default {
+    mixins: [global],
     data() {
         return {
-            email: '',
             activeTab: 0,
-            transactions: [],
+            account: [],
+            password: '',
+            email: '',
+            chats: [],
+            seller: [],
+            pathUrl: 'https://easyhelp.kz',
+            buys: [],
+            sendId: null,
             chatId: null,
-            chatName: '',
+            myId: null,
+            transactions: []
+
+        }
+    },
+    methods: {
+        formatDate(dateString) {
+            const date = new Date(dateString);
+            const formattedDate = `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getFullYear()}`;
+            return formattedDate;
+        },
+        getAccount() {
+            const token = this.getAuthorizationCookie()
+            const path = `${this.pathUrl}/api/buyer/buyer-lk`;
+            axios.defaults.headers.common['Authorization'] = `Token ${token}`;
+            axios
+                .get(path)
+                .then(response => {
+                    this.account = response.data
+                    this.myId = response.data.id
+                    this.transactions = response.data.transactions
+                    this.email = response.data.user.email
+
+                })
+                .catch(error => console.log(error));
+        },
+        openChat(chatId, chatName) {
+            this.activeTab = 7;
+            this.chatId = chatId;
+            this.chatName = chatName
+        },
+        getBuys() {
+            const token = this.getAuthorizationCookie()
+            const path = `${this.pathUrl}/api/buyer/buyer-lk/my-purchases`
+            axios.defaults.headers.common['Authorization'] = `Token ${token}`;
+            axios
+                .get(path)
+                .then(response => {
+                    this.buys = response.data
+                })
+                .catch(error => {
+                    console.error(error)
+                })
+        },
+        createChat(id, name) {
+            const token = this.getAuthorizationCookie()
+            const csrf = this.getCSRFToken()
+            const path = `${this.pathUrl}/api/messanger/new-chat`
+            axios.defaults.headers.common['Authorization'] = `Token ${token}`;
+            axios.defaults.headers.common['X-CSRFToken'] = csrf;
+            axios
+                .post(path, {
+                    buyer: this.myId,
+                    seller: id,
+                })
+                .then(response => {
+                    const chatId = response.data.chat_id
+                    this.openChat(chatId, name)
+                })
+                .catch(error => console.log(error))
+        },
+        getChats() {
+            const token = this.getAuthorizationCookie()
+            const path = `${this.pathUrl}/api/messanger/all-chats`
+            axios.defaults.headers.common['Authorization'] = `Token ${token}`;
+            axios
+                .get(path)
+                .then(res => {
+                    this.chats = res.data
+                })
+                .catch(error => console.log(error))
+        }
+    },
+    mounted() {
+        const accType = localStorage.getItem('accountType')
+        console.log(accType)
+        if (accType == 'buyer-account') {
+            this.getAccount()
+            this.getChats()
+            this.getBuys()
+        }
+        else {
+            window.location.href = '/login'
         }
     }
 }
@@ -191,7 +192,7 @@ useSeoMeta({
     .acc__info {
         display: flex;
         justify-content: center;
-        align-items: center;
+        align-items: flex-start;
         gap: 50px;
         margin: 10.417vw 0;
 

@@ -4,7 +4,7 @@ export default {
     return {
       isAuth: false,
       accountUrl: "",
-      pathUrl: 'https://studynow.kz',
+      pathUrl: 'https://easyhelp.kz',
       cart: [],
     };
   },

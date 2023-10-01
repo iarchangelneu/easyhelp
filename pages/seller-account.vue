@@ -26,89 +26,45 @@
             </button>
         </div>
         <div class="sales" v-if="activeTab == 0">
-            <div class="sales__item">
-                <img src="@/assets/img/why.png" alt="">
+            <div class="sales__item" v-for="item in products" :key="item.id">
+                <img :src="pathUrl + '/api' + item.add_image[0].image" alt="">
 
                 <div class="item__info">
-                    <h1>Услуга Генеральная уборка</h1>
-                    <h1>80 000 ₸</h1>
+                    <h1>{{ item.name }}</h1>
+                    <h1>{{ item.price.toLocaleString() + ' ₸' }}</h1>
 
 
-                    <button @click="activeTab = 6">Изменить</button>
-                    <NuxtLink to="/product/1">Страница услуги</NuxtLink>
+                    <button @click="openEditTab(item.id)">Изменить</button>
+                    <NuxtLink :to="'/product/' + item.id">Страница услуги</NuxtLink>
                 </div>
             </div>
-            <div class="sales__item">
-                <img src="@/assets/img/why.png" alt="">
-
-                <div class="item__info">
-                    <h1>Услуга Генеральная уборка</h1>
-                    <h1>80 000 ₸</h1>
-
-
-                    <button>Изменить</button>
-                    <NuxtLink to="/product/1">Страница услуги</NuxtLink>
-                </div>
-            </div>
-            <div class="sales__item">
-                <img src="@/assets/img/why.png" alt="">
-
-                <div class="item__info">
-                    <h1>Услуга Генеральная уборка</h1>
-                    <h1>80 000 ₸</h1>
-
-
-                    <button>Изменить</button>
-                    <NuxtLink to="/product/1">Страница услуги</NuxtLink>
-                </div>
-            </div>
-
         </div>
         <div class="sales" v-if="activeTab == 1">
-            <div class="sales__item">
-                <img src="@/assets/img/why.png" alt="">
+            <div class="sales__item" v-for="item in sales" :key="item.id">
+                <img :src="pathUrl + '/api' + item.products.add_image[0].image" alt="">
 
                 <div class="item__info">
-                    <h1>Услуга Генеральная уборка</h1>
-                    <h1>80 000 ₸</h1>
-                    <span>Дата исполнения: 12.08.2023</span>
+                    <h1>{{ item.products.name }}</h1>
+                    <h1>{{ item.products.price.toLocaleString() + ' ₸' }}</h1>
+                    <span>Дата исполнения: {{ formatDate(item.date) }}</span>
 
-                    <NuxtLink to="/product/1" style="margin-top: auto; margin-bottom: 15px;">Услуга</NuxtLink>
-                    <button @click="activeTab = 7">Чат с заказчиком</button>
+                    <NuxtLink :to="'/product/' + item.products.id" style="margin-top: auto; margin-bottom: 15px;">Услуга
+                    </NuxtLink>
+                    <button @click="createChat(item.buyer.id, item.buyer.user.first_name)">Чат с заказчиком</button>
 
                 </div>
             </div>
 
         </div>
         <div class="chats" v-if="activeTab == 3">
-            <div class="chat__item">
+            <div class="chat__item" v-for="chat in chats" :key="chat.id">
                 <div>
-                    <h2>alex.ivanov@gmail.com</h2>
+                    <h2>{{ chat.buyer.user.first_name }}</h2>
                     <!-- <small>23.07.2023 14:47</small> -->
                 </div>
 
                 <div class="justify-content-end">
-                    <button @click="activeTab = 7">Открыть чат</button>
-                </div>
-            </div>
-            <div class="chat__item">
-                <div>
-                    <h2>alex.ivanov@gmail.com</h2>
-                    <!-- <small>23.07.2023 14:47</small> -->
-                </div>
-
-                <div class="justify-content-end">
-                    <button @click="activeTab = 7">Открыть чат</button>
-                </div>
-            </div>
-            <div class="chat__item">
-                <div>
-                    <h2>alex.ivanov@gmail.com</h2>
-                    <!-- <small>23.07.2023 14:47</small> -->
-                </div>
-
-                <div class="justify-content-end">
-                    <button @click="activeTab = 7">Открыть чат</button>
+                    <button @click="openChat(chat.id, chat.buyer.user.first_name)">Открыть чат</button>
                 </div>
             </div>
         </div>
@@ -171,19 +127,165 @@
     </div>
 </template>
 <script>
+import global from '~/mixins/global';
+import axios from 'axios';
 export default {
+    mixins: [global],
     data() {
         return {
-            email: '',
             activeTab: 0,
             transactions: [],
-            chatId: null,
+            courseFeaturesText: '',
+            account: [],
+            description: '',
+            name: '',
+            sales: [],
+            photo: '',
+            products: [],
+            chats: [],
             chatName: '',
             sendId: null,
-            courseFeaturesText: '',
+            chatId: null,
+            category: null,
+            avatar: null,
+            pathUrl: 'https://easyhelp.kz',
+            myId: null,
         }
     },
+    computed: {
+        avatarUrl() {
+            if (this.avatar) {
+                // Используем URL объекта File, если avatar существует
+                return URL.createObjectURL(this.avatar);
+            } else {
+                // Используем дефолтное изображение, если avatar не существует
+                return this.photo;
+            }
+        },
+    },
     methods: {
+        formatDate(dateString) {
+            const date = new Date(dateString);
+            const formattedDate = `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getFullYear()}`;
+            return formattedDate;
+        },
+        openEditTab(productId) {
+            this.activeTab = 6;
+            this.sendId = productId;
+        },
+        openChat(chatId, chatName) {
+            this.activeTab = 7;
+            this.chatId = chatId;
+            this.chatName = chatName
+        },
+        createChat(id, name) {
+            const token = this.getAuthorizationCookie()
+            const csrf = this.getCSRFToken()
+            const path = `${this.pathUrl}/api/messanger/new-chat`
+            axios.defaults.headers.common['Authorization'] = `Token ${token}`;
+            axios.defaults.headers.common['X-CSRFToken'] = csrf;
+            axios
+                .post(path, {
+                    buyer: id,
+                    seller: this.myId,
+                })
+                .then(response => {
+                    const chatId = response.data.chat_id
+                    this.openChat(chatId, name)
+                })
+                .catch(error => console.log(error))
+        },
+        getChats() {
+            const token = this.getAuthorizationCookie()
+            const path = `${this.pathUrl}/api/messanger/all-chats`
+            axios.defaults.headers.common['Authorization'] = `Token ${token}`;
+
+            axios
+                .get(path)
+                .then(response => {
+                    this.chats = response.data
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+        },
+        getAccount() {
+            const token = this.getAuthorizationCookie()
+            const path = `${this.pathUrl}/api/seller/seller-lk`;
+            axios.defaults.headers.common['Authorization'] = `Token ${token}`;
+            axios
+                .get(path)
+                .then(response => {
+                    this.account = response.data
+                    this.description = response.data.description
+                    this.courseFeaturesText = response.data.features
+                    this.name = response.data.user.first_name
+                    this.sales = response.data.my_sales
+                    this.photo = this.pathUrl + '/api' + response.data.photo
+                    this.products = response.data.products
+                    this.transactions = response.data.transactions
+                    this.category = response.data.category.id
+                    this.myId = response.data.id
+
+                })
+                .catch(error => console.log(error));
+        },
+        editAccount() {
+
+            const path = `${this.pathUrl}/api/seller/seller-lk/edit/`
+            const csrf = this.getCSRFToken()
+
+            const user = {
+                first_name: this.name,
+                email: this.email,
+            };
+            const formData = new FormData();
+            formData.append('user.[first_name]', this.name);
+            formData.append('user.[email]', this.email);
+
+            // Добавляем остальные данные
+            formData.append('description', this.description);
+            if (this.avatar == null) {
+                formData.append('photo', '');
+            }
+            else {
+                formData.append('photo', this.avatar);
+            }
+            formData.append('category', this.category);
+            formData.append('features', this.courseFeaturesText)
+
+            axios.defaults.headers.common['X-CSRFToken'] = csrf;
+            this.$refs.edit.innerHTML = 'Сохраняем'
+
+            axios
+                .put(path, formData)
+                .then((res) => {
+                    if (res.status == 200) {
+                        this.$refs.edit.innerHTML = 'Успешно'
+                        this.name = res.data.user.first_name
+                        this.description = res.data.description
+                        this.email = res.data.user.email
+                    }
+                    else {
+                        this.$refs.edit.innerHTML = 'Ошибка'
+                    }
+                })
+                .catch((error) => {
+                    console.error(error);
+
+                });
+        },
+        openFileInput() {
+            this.$refs.fileInput.click();
+        },
+        handleFileChange(event) {
+            const file = event.target.files[0];
+            if (file) {
+                this.avatar = file;
+                event.target.value = null;
+                console.log("Выбран файл:", file);
+            }
+        },
         handleKeyDown(event) {
             if (event.key === 'Backspace' && !this.courseFeaturesText) {
                 event.preventDefault();
@@ -198,6 +300,17 @@ export default {
                 return;
             }
         },
+    },
+    mounted() {
+        const accType = localStorage.getItem('accountType')
+        console.log(accType)
+        if (accType == 'seller-account') {
+            this.getAccount()
+            this.getChats()
+        }
+        else {
+            window.location.href = '/login'
+        }
     }
 }
 </script>

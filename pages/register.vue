@@ -8,30 +8,33 @@
             <div class="nado">
                 <h1>Регистрация</h1>
                 <div class="type">
-                    <button :class="{ activeBtn: type == 'seller' }" @click="type = 'seller'">Исполнитель</button>
-                    <button :class="{ activeBtn: type == 'buyer' }" @click="type = 'buyer'">Заказчик</button>
+                    <button :class="{ activeBtn: userType == 'seller' }" @click="userType = 'seller'">Исполнитель</button>
+                    <button :class="{ activeBtn: userType == 'buyer' }" @click="userType = 'buyer'">Заказчик</button>
                 </div>
-                <input type="email" v-model="email" placeholder="Эл.почта">
-                <input type="password" v-model="password" placeholder="Пароль">
-                <input type="password" v-model="password_repeat" placeholder="Повторите пароль">
+                <input type="email" v-model="email" placeholder="Эл.почта" ref="email">
+                <input type="password" v-model="password" placeholder="Пароль" ref="password">
+                <input type="password" v-model="repeat__password" placeholder="Повторите пароль" ref="repeat__password">
                 <input type="text" v-model="name"
-                    :placeholder="type === 'seller' ? 'ФИ или название компании' : 'Ваше имя'">
-                <select name="" id="" v-if="type == 'seller'">
+                    :placeholder="userType === 'seller' ? 'ФИ или название компании' : 'Ваше имя'" ref="name">
+                <select name="" id="" v-if="userType == 'seller'" v-model="selectedCategory" ref="select">
                     <option value="" selected disabled>
                         Выберите специализацию
                     </option>
-                    <option value="">Текст</option>
+                    <option v-for="(category, index) in categories" :key="index" :value="category.id">{{ category.name
+                    }}
+                    </option>
                 </select>
                 <label class="custom-checkbox text-left">
-                    <input type="checkbox">
-                    <p class="checkbox-text m-0">Я согласен с <NuxtLink to="/terms">пользовательским соглашением
+                    <input type="checkbox" v-model="checked">
+                    <p class="checkbox-text m-0" ref="checked">Я согласен с <NuxtLink to="/terms">пользовательским
+                            соглашением
                         </NuxtLink>
                         и <NuxtLink to="/polytics">политикой конфиденциальности</NuxtLink>
                     </p>
                 </label>
 
                 <div class="text-center">
-                    <button>Зарегистрироваться</button>
+                    <button @click="register()">Зарегистрироваться</button>
 
                     <span>Уже есть аккаунт? <NuxtLink to="/login">Войти</NuxtLink></span>
                 </div>
@@ -40,16 +43,140 @@
     </div>
 </template>
 <script>
+import global from '~/mixins/global';
+import axios from 'axios';
 export default {
+    mixins: [global],
     data() {
         return {
             email: '',
             password: '',
-            password_repeat: '',
+            repeat__password: '',
             name: '',
-            type: 'seller',
+            userType: 'seller',
+            selectedCategory: 0,
+            checked: false,
+            error: '',
+            pathUrl: 'https://easyhelp.kz',
+            categories: [
+                { id: 1, name: 'Клининг' },
+                { id: 2, name: 'Ремонт дома' },
+                { id: 3, name: 'Сантехника' },
+                { id: 4, name: 'Строительство' },
+                { id: 5, name: 'Электрика' },
+                { id: 6, name: 'Сборка мебели' },
+                { id: 7, name: 'Установка' },
+                { id: 8, name: 'Погрузка' },
+            ],
         }
-    }
+    },
+    methods: {
+        register() {
+            const buyer = `${this.pathUrl}/api/main/registration/buyer`
+            const seller = `${this.pathUrl}/api/main/registration/seller`
+            const csrf = this.getCSRFToken()
+
+            if (this.email !== '') {
+                this.error = ''
+                this.$refs.email.style.borderColor = '#E3E3E3'
+
+                if (this.password != 0 && this.password == this.repeat__password) {
+                    this.$refs.password.style.borderColor = '#E3E3E3'
+                    this.$refs.repeat__password.style.borderColor = '#E3E3E3'
+                    this.error = ''
+
+                    if (this.checked) {
+                        this.$refs.checked.style.color = '#E3E3E3'
+                        if (this.name !== '') {
+                            this.$refs.name.style.borderColor = '#E3E3E3'
+                            this.error = ''
+                            if (this.userType == 'seller') {
+                                if (this.selectedCategory > 0) {
+
+
+                                    this.$refs.select.style.borderColor = '#E3E3E3'
+                                    this.error = ''
+                                    axios.defaults.headers.common['X-CSRFToken'] = csrf;
+                                    axios
+                                        .post(seller, { first_name: this.name, password: this.password, username: this.email, email: this.email, category: this.selectedCategory })
+                                        .then((res) => {
+
+                                            document.cookie = `Authorization=${res.data.token}; expires=Fri, 31 Dec 2023 23:59:59 GMT; path=/`;
+                                            console.log(res)
+                                            localStorage.setItem('accountType', res.data.redirect_url)
+                                            window.location.href = res.data.redirect_url
+                                        })
+                                        .catch((error) => {
+                                            if (error.response.data.detail) {
+                                                this.error = error.response.data.detail
+                                            }
+                                            this.error = 'Ошибка на стороне сервера'
+                                            console.log(error.response);
+                                        });
+                                }
+                                else {
+                                    this.error = 'Выберите специализацию'
+                                    this.$refs.select.style.borderColor = 'red'
+                                }
+
+                            }
+                            else {
+                                axios.defaults.headers.common['X-CSRFToken'] = csrf;
+                                this.error = ''
+                                axios
+                                    .post(buyer, { first_name: this.name, email: this.email, password: this.password, username: this.email, email: this.email })
+                                    .then((res) => {
+
+                                        document.cookie = `Authorization=${res.data.token}; expires=Fri, 31 Dec 2023 23:59:59 GMT; path=/`;
+                                        console.log(res)
+                                        localStorage.setItem('accountType', res.data.redirect_url)
+                                        window.location.href = '/'
+                                    })
+                                    .catch((error) => {
+                                        console.log(error.responseS);
+                                        this.error = error.response.data.detail
+                                    });
+                            }
+
+                        }
+                        else {
+                            this.error = 'Вы не заполнили имя'
+                            this.$refs.name.style.borderColor = 'red'
+                        }
+                    }
+                    else {
+                        this.$refs.checked.style.color = 'red'
+                        this.error = 'Вы не согласились с условиями'
+                    }
+                }
+                else {
+                    this.error = 'Пароли не совпадают'
+                    this.$refs.password.style.borderColor = 'red'
+                    this.$refs.repeat__password.style.borderColor = 'red'
+                }
+            }
+            else {
+                this.error = 'Вы не указали почту'
+                this.$refs.email.style.borderColor = 'red'
+            }
+        },
+        getCategoryName(categoryId) {
+            const category = this.categories.find((c) => c.id === categoryId);
+            return category ? category.name : "";
+        },
+    },
+    mounted() {
+        const accType = localStorage.getItem('accountType')
+        if (accType == 'buyer-account') {
+            window.location.href = '/buyer-account'
+        }
+        else if (accType == 'seller-account') {
+            window.location.href = '/seller-account'
+        }
+        else {
+            console.log('not authorized')
+        }
+    },
 }
 </script>
 <script setup>

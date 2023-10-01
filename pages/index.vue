@@ -22,83 +22,18 @@
             <h1>Популярные услуги</h1>
 
             <div class="catalog">
-                <div class="catalog__item">
-                    <img src="@/assets/img/pop1.png" alt="">
-                    <h1>Генеральная уборка</h1>
+                <div class="catalog__item" v-for="item in products" :key="item.id">
+                    <img :src="pathUrl + '/api' + item.add_image[0]" alt="">
+                    <h1>{{ item.name }}</h1>
 
-                    <ul>
-                        <li>Мытье окон</li>
-                        <li>Чистка сантехники</li>
-                        <li>Мытье полов с отпариванием</li>
-                        <li>1 раз в неделю</li>
+                    <ul v-if="item.key_features">
+                        <li v-for="(feature, index) in item.key_features.split('\r\n')" :key="index">{{ feature }}
+                        </li>
                     </ul>
 
                     <div class="price">
-                        <h2>80 000 ₸</h2>
-                        <NuxtLink to="/product/1">Подробнее</NuxtLink>
-                    </div>
-                </div>
-                <div class="catalog__item">
-                    <img src="@/assets/img/pop5.png" alt="">
-                    <h1>Генеральная уборка</h1>
-
-                    <ul>
-                        <li>Мытье окон</li>
-                        <li>Чистка сантехники</li>
-                        <li>Мытье полов с отпариванием</li>
-                    </ul>
-
-                    <div class="price">
-                        <h2>80 000 ₸</h2>
-                        <NuxtLink to="/product/1">Подробнее</NuxtLink>
-                    </div>
-                </div>
-                <div class="catalog__item">
-                    <img src="@/assets/img/pop2.png" alt="">
-                    <h1>Генеральная уборка</h1>
-
-                    <ul>
-                        <li>Мытье окон</li>
-                        <li>Чистка сантехники</li>
-                        <li>Мытье полов с отпариванием</li>
-                        <li>1 раз в неделю</li>
-                    </ul>
-
-                    <div class="price">
-                        <h2>80 000 ₸</h2>
-                        <NuxtLink to="/product/1">Подробнее</NuxtLink>
-                    </div>
-                </div>
-                <div class="catalog__item">
-                    <img src="@/assets/img/pop3.png" alt="">
-                    <h1>Генеральная уборка</h1>
-
-                    <ul>
-                        <li>Мытье окон</li>
-                        <li>Чистка сантехники</li>
-                        <li>Мытье полов с отпариванием</li>
-                        <li>1 раз в неделю</li>
-                    </ul>
-
-                    <div class="price">
-                        <h2>80 000 ₸</h2>
-                        <NuxtLink to="/product/1">Подробнее</NuxtLink>
-                    </div>
-                </div>
-                <div class="catalog__item">
-                    <img src="@/assets/img/pop4.png" alt="">
-                    <h1>Генеральная уборка</h1>
-
-                    <ul>
-                        <li>Мытье окон</li>
-                        <li>Чистка сантехники</li>
-                        <li>Мытье полов с отпариванием</li>
-                        <li>1 раз в неделю</li>
-                    </ul>
-
-                    <div class="price">
-                        <h2>80 000 ₸</h2>
-                        <NuxtLink to="/product/1">Подробнее</NuxtLink>
+                        <h2>{{ item.price.toLocaleString() + ' ₸' }}</h2>
+                        <NuxtLink :to="'/product/' + item.id">Подробнее</NuxtLink>
                     </div>
                 </div>
             </div>
@@ -155,83 +90,16 @@
             <h1>Популярные исполнители</h1>
 
             <div class="catalog">
-                <div class="catalog__item">
-                    <img src="@/assets/img/exp1.png" alt="">
-                    <h1>Генеральная уборка</h1>
+                <div class="catalog__item" v-for="item in  experts.results " :key="item.id">
+                    <img :src="item.photo" alt="">
+                    <h1>{{ item.user.first_name }}</h1>
 
-                    <ul>
-                        <li>Мытье окон</li>
-                        <li>Чистка сантехники</li>
-                        <li>Мытье полов с отпариванием</li>
-                        <li>1 раз в неделю</li>
+                    <ul v-if="item.features">
+                        <li v-for="( feature, index ) in  item.features.split('\r\n') " :key="index">{{ feature }}
+                        </li>
                     </ul>
-
                     <div class="price">
-                        <h2>80 000 ₸</h2>
-                        <NuxtLink to="/expert/1">Подробнее</NuxtLink>
-                    </div>
-                </div>
-                <div class="catalog__item">
-                    <img src="@/assets/img/exp2.png" alt="">
-                    <h1>Генеральная уборка</h1>
-
-                    <ul>
-                        <li>Мытье окон</li>
-                        <li>Чистка сантехники</li>
-                        <li>Мытье полов с отпариванием</li>
-                    </ul>
-
-                    <div class="price">
-                        <h2>80 000 ₸</h2>
-                        <NuxtLink to="/expert/1">Подробнее</NuxtLink>
-                    </div>
-                </div>
-                <div class="catalog__item">
-                    <img src="@/assets/img/exp3.png" alt="">
-                    <h1>Генеральная уборка</h1>
-
-                    <ul>
-                        <li>Мытье окон</li>
-                        <li>Чистка сантехники</li>
-                        <li>Мытье полов с отпариванием</li>
-                        <li>1 раз в неделю</li>
-                    </ul>
-
-                    <div class="price">
-                        <h2>80 000 ₸</h2>
-                        <NuxtLink to="/expert/1">Подробнее</NuxtLink>
-                    </div>
-                </div>
-                <div class="catalog__item">
-                    <img src="@/assets/img/exp4.png" alt="">
-                    <h1>Генеральная уборка</h1>
-
-                    <ul>
-                        <li>Мытье окон</li>
-                        <li>Чистка сантехники</li>
-                        <li>Мытье полов с отпариванием</li>
-                        <li>1 раз в неделю</li>
-                    </ul>
-
-                    <div class="price">
-                        <h2>80 000 ₸</h2>
-                        <NuxtLink to="/expert/1">Подробнее</NuxtLink>
-                    </div>
-                </div>
-                <div class="catalog__item">
-                    <img src="@/assets/img/exp5.png" alt="">
-                    <h1>Генеральная уборка</h1>
-
-                    <ul>
-                        <li>Мытье окон</li>
-                        <li>Чистка сантехники</li>
-                        <li>Мытье полов с отпариванием</li>
-                        <li>1 раз в неделю</li>
-                    </ul>
-
-                    <div class="price">
-                        <h2>80 000 ₸</h2>
-                        <NuxtLink to="/expert/1">Подробнее</NuxtLink>
+                        <NuxtLink :to="'/expert/' + item.id" class="w-100 text-center">Подробнее</NuxtLink>
                     </div>
                 </div>
             </div>
@@ -332,7 +200,10 @@
 import { Navigation } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import 'swiper/css';
+import global from '~/mixins/global';
+import axios from 'axios';
 export default {
+    mixins: [global],
     data() {
         return {
             isSeller: true,
@@ -353,8 +224,39 @@ export default {
                     spaceBetween: 30,
                 }
             },
+            pathUrl: 'https://easyhelp.kz',
+            experts: [],
+            products: [],
         }
     },
+    methods: {
+        getPopulars() {
+            const path = `${this.pathUrl}/api/products/popular-product?amount_products=10`;
+            axios
+                .get(path)
+                .then(response => {
+                    this.products = response.data
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+        },
+        getExperts() {
+            let url = `${this.pathUrl}/api/seller/all-seller`;
+            axios
+                .get(url)
+                .then(response => {
+                    this.experts = response.data;
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        },
+    },
+    mounted() {
+        this.getPopulars()
+        this.getExperts()
+    }
 }
 </script>
 <script setup>

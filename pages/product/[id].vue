@@ -1,61 +1,138 @@
 <template>
-    <div class="product">
+    <div v-if="product.length <= 0"></div>
+    <div class="product" v-else>
         <prevPage></prevPage>
 
-        <h1>Услуга Генеральная уборка</h1>
+        <h1> {{ product.name }}</h1>
 
 
         <div class="product__info">
             <div class="image">
-                <img src="@/assets/img/product.png" alt="">
+                <img :src="product.add_image[0].image" alt="">
 
                 <div class="category">
-                    <h2>Категория: <span>клининг</span></h2>
+                    <h2>Категория: <span>{{ product.category.category_name }}</span></h2>
 
-                    <ul>
-                        <li>Мытье окон</li>
-                        <li>Чистка сантехники</li>
-                        <li>Мытье полов с отпариванием</li>
-                        <li>1 раз в неделю</li>
+                    <ul v-if="product.key_features">
+                        <li v-for="(feature, index) in product.key_features.split('\r\n')" :key="index">{{ feature }}
+                        </li>
                     </ul>
                 </div>
             </div>
 
             <div class="product__desc">
-                <h3>Пакетое предложение, уборка раз в неделю в течение месяца</h3>
-                <h2>Описание услуги:</h2>
 
-                <div v-html="description" class="description"></div>
+                <div v-html="product.description" class="description"></div>
                 <div class="mobauthor">
                     <div class="author">
-                        <span>Автор: <NuxtLink to="/expert/1">Клининг «Белоснежка»</NuxtLink></span>
-                        <span style="display: flex; align-items: center; gap: 17px;">Рейтинг: 4,5 <img
-                                src="@/assets/img/star.svg" alt=""></span>
-                        <span>Количество услуг на сайте: 6</span>
+                        <span>Автор: <NuxtLink :to="'/expert/' + product.seller.id">{{ seller.first_name }}</NuxtLink>
+                            </span>
+                        <span style="display: flex; align-items: center; gap: 17px;">Рейтинг: {{ product.seller.rating }}
+                            <img src="@/assets/img/star.svg" alt=""></span>
+                        <span>Количество услуг на сайте: {{ product.seller.amount_products }}</span>
                     </div>
                 </div>
                 <div class="price">
-                    <span>80 000 ₸</span>
-                    <button>Заказать</button>
+                    <span>{{ product.price.toLocaleString() + ' ₸' }}</span>
+                    <button ref="cartBtn" @click="addToCart()" v-if="accType == 'buyer' || accType == ''">Заказать</button>
                 </div>
             </div>
 
             <div class="product__author">
                 <div class="author">
-                    <span>Автор: <NuxtLink to="/expert/1">Клининг «Белоснежка»</NuxtLink></span>
-                    <span style="display: flex; align-items: center; gap: 17px;">Рейтинг: 4,5 <img
+                    <span>Автор: <NuxtLink :to="'/expert/' + product.seller.id">{{ seller.first_name }}</NuxtLink></span>
+                    <span style="display: flex; align-items: center; gap: 17px;">Рейтинг: {{ product.seller.rating }} <img
                             src="@/assets/img/star.svg" alt=""></span>
-                    <span>Количество услуг на сайте: 6</span>
+                    <span>Количество услуг на сайте: {{ product.seller.amount_products }}</span>
                 </div>
             </div>
         </div>
     </div>
 </template>
 <script>
+import global from '~/mixins/global';
+import axios from 'axios';
 export default {
+    mixins: [global],
     data() {
         return {
+            productId: this.$route.params.id,
+            product: [],
+            seller: [],
+            pathUrl: 'https://easyhelp.kz',
+            category: '',
+            rating: null,
+            count: null,
+            apiResponse: '',
+            accType: '',
             description: 'Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание Тут будет описание',
+        }
+    },
+    methods: {
+        addToCart() {
+            const path = `${this.pathUrl}/api/buyer/add-product-basket`
+            const csrf = this.getCSRFToken()
+
+            if (!this.accType == '') {
+
+                axios.defaults.headers.common['X-CSRFToken'] = csrf;
+                axios
+                    .post(path, {
+                        products: this.product.id,
+                        amount: 1,
+                    })
+                    .then(response => {
+                        if (response.status == 201) {
+                            this.$refs.cartBtn.innerHTML = 'Добавлен в корзину'
+                            this.$refs.cartBtn.disabled = true
+                            this.$refs.cartBtn.classList.add('disabled')
+                            this.getCart()
+                        }
+                        else {
+                            this.$refs.cartBtn.innerHTML = 'Произошла ошибка, попробуйте еще раз'
+                            this.$refs.cartBtn.disabled = false
+
+                        }
+                        console.log(response)
+                    })
+                    .catch(error => {
+                        console.error(error)
+                    })
+            }
+            else {
+                window.location.href = '/login'
+            }
+        },
+
+        getProduct() {
+            const path = `${this.pathUrl}/api/products/detail-product/${this.productId}`
+            axios
+                .get(path)
+                .then(response => {
+                    this.product = response.data
+                    this.seller = response.data.seller.user
+                    this.rating = response.data.seller.rating
+                    this.category = response.data.category.category_name
+                    this.count = response.data.seller.amount_products
+                })
+                .catch(error => {
+                    console.error(error)
+                })
+        },
+    },
+    mounted() {
+        this.getProduct()
+
+        const accType = localStorage.getItem('accountType')
+        if (accType == 'buyer-account') {
+            this.accType = 'buyer'
+        }
+        else if (accType == 'seller-account') {
+            this.accType = 'seller'
+        }
+        else {
+            this.accType = ''
+            console.log('not authorized')
         }
     }
 }

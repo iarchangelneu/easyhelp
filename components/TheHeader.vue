@@ -6,21 +6,23 @@
                 <NuxtLink to="/experts">Исполнители</NuxtLink>
             </div>
 
-            <img src="@/assets/img/headerlogo.svg" class="logopc img-fluid" alt="">
-            <img src="@/assets/img/headerlogomob.svg" class="logomob img-fluid" alt="">
+            <NuxtLink to="/" class="logopc"><img src="@/assets/img/headerlogo.svg" class="mr-5 pr-5" alt=""></NuxtLink>
+            <NuxtLink to="/" class="logomob "><img src="@/assets/img/headerlogomob.svg" alt=""></NuxtLink>
 
-            <div v-if="!isAuth">
+            <div v-if="accountUrl !== '/seller-account' && accountUrl !== '/buyer-account'">
                 <NuxtLink to="/login">Вход / регистрация</NuxtLink>
             </div>
             <div v-else>
-                <span class="balance">12 000 ₸</span>
-                <NuxtLink to="/refill" class="cash">
+                <span class="balance" v-if="userBalance !== null">{{ userBalance == null ? '0 ₸' :
+                    userBalance.toLocaleString()
+                    + ' ₸' }}</span>
+                <NuxtLink to="/withdrawal" class="cash">
                     <img src="@/assets/img/cash.svg" alt="">
                 </NuxtLink>
-                <NuxtLink to="/cart">
+                <NuxtLink to="/cart" v-if="accountUrl == '/buyer-account'">
                     <img src="@/assets/img/cart.svg" alt="">
                 </NuxtLink>
-                <NuxtLink to="/seller-account">
+                <NuxtLink :to="this.accountUrl">
                     <img src="@/assets/img/acc.svg" alt="">
                 </NuxtLink>
 
@@ -39,9 +41,10 @@
                 <NuxtLink to="/experts">Исполнители</NuxtLink>
             </div>
             <div class="links">
-                <NuxtLink to="/seller-account">Профиль</NuxtLink>
+                <NuxtLink :to="this.accountUrl">Профиль</NuxtLink>
                 <NuxtLink to="/refill" class="refill">
-                    <span>12 000 ₸</span>
+                    <span v-if="userBalance !== null">{{ userBalance == null ? '0 ₸' : userBalance.toLocaleString()
+                        + ' ₸' }}</span>
                     <img src="@/assets/img/cash2.svg" alt="">
                 </NuxtLink>
             </div>
@@ -49,13 +52,64 @@
     </header>
 </template>
 <script>
+import global from '~/mixins/global';
+import axios from 'axios'
 export default {
+    mixins: [global],
     data() {
         return {
             hideHeaderOnPages: ['login', 'register'],
             isAuth: true,
             menuOpen: false,
+            pathUrl: 'https://easyhelp.kz',
+            userBalance: null,
+            accountType: '',
         }
+    },
+    methods: {
+        getBuyer() {
+            const token = this.getAuthorizationCookie()
+            const path = `${this.pathUrl}/api/buyer/buyer-lk`;
+            axios.defaults.headers.common['Authorization'] = `Token ${token}`;
+            axios
+                .get(path)
+                .then(response => {
+                    this.userBalance = response.data.balance
+
+                })
+                .catch(error => console.log(error));
+        },
+        getSeller() {
+            const token = this.getAuthorizationCookie()
+            const path = `${this.pathUrl}/api/seller/seller-lk`;
+            axios.defaults.headers.common['Authorization'] = `Token ${token}`;
+            axios
+                .get(path)
+                .then(response => {
+                    this.userBalance = response.data.balance
+
+                })
+                .catch(error => console.log(error));
+        },
+
+    },
+    mounted() {
+        const accType = localStorage.getItem('accountType')
+        if (accType == 'buyer-account') {
+            this.getBuyer()
+            this.accountType = 'buyer'
+            setInterval(() => {
+                this.cartLength = localStorage.getItem('cartLength')
+            }, 1);
+        }
+        else if (accType == 'seller-account') {
+            this.getSeller()
+            this.accountType = 'seller'
+        }
+        else {
+            console.log('not authorized')
+        }
+
     }
 }
 </script>
@@ -64,6 +118,7 @@ header {
     padding: 40px 100px 30px;
     background: #fff;
     position: fixed;
+    z-index: 100;
     width: 100%;
 
     @media (max-width: 1600px) {

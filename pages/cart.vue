@@ -6,27 +6,15 @@
 
         <div class="cart__body">
             <div class="cart__items">
-                <div class="cart__item">
-                    <img src="@/assets/img/cart.png" alt="">
+                <div class="cart__item" v-if="cart.length > 0" v-for="item in cart" :key="item.id">
+                    <img :src="pathUrl + '/api' + item.products.add_image[0].image" alt="">
 
                     <div class="item__info">
-                        <h2>Услуга Установка сантехники</h2>
-                        <h2>80 000 ₸</h2>
+                        <h2>{{ item.products.name }}</h2>
+                        <h2>{{ item.products.price.toLocaleString() + ' ₸' }}</h2>
 
                         <div class="text-right">
-                            <img src="@/assets/img/delete.svg" alt="">
-                        </div>
-                    </div>
-                </div>
-                <div class="cart__item">
-                    <img src="@/assets/img/cart.png" alt="">
-
-                    <div class="item__info">
-                        <h2>Услуга Установка сантехники</h2>
-                        <h2>80 000 ₸</h2>
-
-                        <div class="text-right">
-                            <img src="@/assets/img/delete.svg" alt="">
+                            <img src="@/assets/img/delete.svg" @click="deleteFromCart(item.id)" alt="">
                         </div>
                     </div>
                 </div>
@@ -35,20 +23,134 @@
 
             <div class="complete">
                 <h1>Подтверждение покупки</h1>
-                <span>Количество заказов: 2</span>
-                <span>Итоговая сумма: 156 000 ₸ </span>
+                <span>Количество заказов: {{ cart.length }}</span>
+                <span>Итоговая сумма: {{ formatPrice(calculateTotal()) }} ₸ </span>
                 <small>Сумма будет списана с вашего счета. Товары отобразятся во вкладке «Мои заказы» в Вашем Личном
                     кабинете.</small>
 
-                <button>Подтвердить заказ</button>
+                <button @click="buyProduct()" ref="buyBtn">Подтвердить заказ</button>
             </div>
         </div>
     </div>
 </template>
 <script>
+import global from '~/mixins/global';
+import axios from 'axios';
 export default {
+    mixins: [global],
     data() {
-        return {}
+        return {
+            cart: [],
+            pathUrl: 'https://easyhelp.kz',
+        }
+    },
+    methods: {
+        increment(item) {
+            item.amount++;
+            console.log(item)
+            this.changeAmount(item)
+        },
+        decrement(item) {
+            if (item.amount > 0) {
+                item.amount--;
+                console.log(item)
+                this.changeAmount(item)
+            }
+            if (item.amount <= 0) {
+                item.amount = 1
+                this.deleteFromCart(item.id)
+            }
+        },
+        buyProduct() {
+            const token = this.getAuthorizationCookie()
+            const path = `${this.pathUrl}/api/buyer/placed-basket`
+            axios.defaults.headers.common['Authorization'] = `Token ${token}`;
+            this.$refs.buyBtn.innerHTML = 'Оформляем'
+            axios
+                .get(path)
+                .then(response => {
+                    console.log(response)
+                    if (response.status == 204) {
+                        this.$refs.buyBtn.innerHTML = 'Недостаточно средств'
+                    }
+                    if (response.status == 201) {
+                        // this.getBuyer()
+                        this.$refs.buyBtn.innerHTML = 'Оплата прошла успешно'
+
+                        setTimeout(() => {
+                            window.location.href = `/catalog`
+                        }, 3);
+
+                    }
+                })
+                .catch(error => {
+                    console.error(error)
+                })
+
+        },
+        changeAmount(item) {
+            const token = this.getAuthorizationCookie()
+            const path = `${this.pathUrl}/api/buyer/all-product-basket`;
+            axios.defaults.headers.common['Authorization'] = `Token ${token}`;
+
+            axios
+                .put(path, item)
+                .then((res) => {
+                    console.log(res)
+                    //     this.getCart()
+                })
+                .catch((error) => {
+                    console.error(error);
+
+                });
+        },
+        calculateTotal() {
+            let total = 0;
+
+            this.cart.forEach(item => {
+                const { price, discount } = item.products;
+                const discountedPrice = price * (1 - discount / 100);
+                total += discountedPrice * item.amount;
+            });
+
+            return total;
+        },
+        formatPrice(price) {
+            return price.toLocaleString('ru-RU');
+        },
+        deleteFromCart(id) {
+            const token = this.getAuthorizationCookie()
+            const csrf = this.getCSRFToken()
+            const path = `${this.pathUrl}/api/buyer/delete-product-basket/${id}`
+            axios.defaults.headers.common['Authorization'] = `Token ${token}`;
+            axios.defaults.headers.common['X-CSRFToken'] = csrf;
+            axios
+                .put(path)
+                .then(response => {
+                    console.log(response)
+                    this.getCart()
+                })
+                .catch(error => {
+                    console.error(error)
+                })
+        },
+        getCart() {
+            const token = this.getAuthorizationCookie()
+            const path = `${this.pathUrl}/api/buyer/all-product-basket`;
+            axios.defaults.headers.common['Authorization'] = `Token ${token}`;
+
+            axios
+                .get(path)
+                .then(response => {
+                    this.cart = response.data
+                })
+                .catch(error => {
+                    console.error(error)
+                })
+        },
+    },
+    mounted() {
+        this.getCart()
     }
 }
 </script>
