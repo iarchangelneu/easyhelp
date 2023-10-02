@@ -22,7 +22,7 @@
                 <NuxtLink to="/cart" v-if="accountUrl == '/buyer-account'">
                     <img src="@/assets/img/cart.svg" alt="">
                 </NuxtLink>
-                <NuxtLink :to="this.accountUrl">
+                <NuxtLink :to="accountUrl">
                     <img src="@/assets/img/acc.svg" alt="">
                 </NuxtLink>
 
@@ -41,7 +41,7 @@
                 <NuxtLink to="/experts">Исполнители</NuxtLink>
             </div>
             <div class="links">
-                <NuxtLink :to="this.accountUrl">Профиль</NuxtLink>
+                <NuxtLink :to="accountUrl">Профиль</NuxtLink>
                 <NuxtLink to="/refill" class="refill">
                     <span v-if="userBalance !== null">{{ userBalance == null ? '0 ₸' : userBalance.toLocaleString()
                         + ' ₸' }}</span>
