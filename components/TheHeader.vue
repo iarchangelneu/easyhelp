@@ -10,7 +10,7 @@
             <NuxtLink to="/" class="logomob "><img src="@/assets/img/headerlogomob.svg" alt=""></NuxtLink>
 
             <div v-if="accountUrl !== '/seller-account' && accountUrl !== '/buyer-account'">
-                <NuxtLink to="/login">Вход / регистрация</NuxtLink>
+                <NuxtLink to="/login">Вход / Регистрация</NuxtLink>
             </div>
             <div v-else>
                 <span class="balance" v-if="userBalance !== null">{{ userBalance == null ? '0 ₸' :
