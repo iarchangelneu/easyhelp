@@ -2,7 +2,7 @@
     <div class="page">
 
         <h1>
-            <span>Вывод средств прошел успешно</span>
+            <span>Транзакция прошла успешно</span>
             <img src="@/assets/img/successpg.svg" alt="">
         </h1>
 
