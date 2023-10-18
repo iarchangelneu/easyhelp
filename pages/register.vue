@@ -196,7 +196,6 @@ useSeoMeta({
         justify-content: center;
         align-items: center;
         height: 100vh;
-        margin-top: -70px;
 
         @media (max-width: 1024px) {
             width: 100%;
