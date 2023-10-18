@@ -57,7 +57,7 @@ export default {
             cardNumber: '',
             cardHolder: '',
             cardNumberMaxLength: 19,
-            pathUrl: 'https://experthub.kz',
+            pathUrl: 'https://easyhelp.kz',
             accountType: '',
         }
     },

@@ -42,7 +42,7 @@
             </div>
             <div class="links">
                 <NuxtLink :to="accountUrl">Профиль</NuxtLink>
-                <NuxtLink to="/refill" class="refill">
+                <NuxtLink to="/refill" class="withdrawal">
                     <span v-if="userBalance !== null">{{ userBalance == null ? '0 ₸' : userBalance.toLocaleString()
                         + ' ₸' }}</span>
                     <img src="@/assets/img/cash2.svg" alt="">

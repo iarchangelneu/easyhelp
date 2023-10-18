@@ -78,6 +78,22 @@ export default {
                 })
         },
     },
+    mounted() {
+        const accType = localStorage.getItem('accountType')
+        if (accType !== 'buyer-account' && accType !== 'seller-account') {
+            window.location.href = '/login'
+        }
+        if (accType == 'buyer-account') {
+            this.accountType = 'buyer'
+
+        }
+        else if (accType == 'seller-account') {
+            this.accountType = 'seller'
+        }
+        else {
+            return
+        }
+    }
 }
 </script>
 <script setup>
